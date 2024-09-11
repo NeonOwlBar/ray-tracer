@@ -3,9 +3,7 @@
 
 int main()
 {
-    
     // Image
-
     int image_width = 256;
     int image_height = 256;
 
@@ -20,6 +18,9 @@ int main()
     // outer loop for rows
     for (int j = 0; j < image_height; j++)
     {
+        // outputs number of rows remaining. Refreshed each loop.
+        std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
+
         // inner loop for columns
         for (int i = 0; i < image_width; i++)
         {
@@ -43,5 +44,7 @@ int main()
             imageOut << ir << ' ' << ig << ' ' << ib << '\n';
         }
     }
+
+    std::clog << "\rDone.               \n";
 }
 
