@@ -27,23 +27,31 @@ public:
 
 	// Returns the negative vector
 	vec3 operator-() const { return vec3(-e[0], -e[1], -e[2]); }
-	// Returns value at index i
+
+	// The below operator[] functions are used on different types of vec3 objects.
+	// A const vec3 cannot be modified and is read-only, 
+	//		and therefore can only return a COPY of a value.
+	// A regular, non-const vec3 CAN be modified (read/write), 
+	//		and therefore returns a REFERENCE to the value.
+	// 
+	// Returns a copy of the value at index i. Read-only.
 	double operator[](int i) const { return e[i]; }
-	// Returns a reference(???) of value at index i
+	// Returns a reference to the value at index i. Read/write.
 	double& operator[](int i) { return e[i]; }
 
-	// Adds a passed vector's values to the current values
+	// Adds a passed vector's values to this object's current values
 	vec3& operator +=(const vec3& v)
 	{
 		e[0] += v.e[0];
 		e[1] += v.e[1];
 		e[2] += v.e[2];
-		// Returns the object ("this" returns a pointer to an object, 
-		// therefore "*this" dereferences the pointer, returning the object itself).
+		// Returns the object
+		// ("this" returns a pointer to an object, therefore "*this" 
+		//		dereferences the pointer, returning the object itself).
 		return *this;
 	}
 
-	// Multiplies this vector by a passed scalar value
+	// Multiplies this object's vector values by a passed scalar value
 	vec3& operator*=(double t)
 	{
 		e[0] *= t;
@@ -52,7 +60,7 @@ public:
 		return *this;
 	}
 
-	// Multiplies this vector by the inverse of a passed scalar value
+	// Divides this object's vector values by a passed scalar value
 	vec3& operator/=(double t)
 	{
 		return *this *= 1/t;
@@ -110,32 +118,32 @@ inline vec3 operator-(const vec3& u, const vec3& v)
 	return vec3(u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2]);
 }
 
-// Overrides the * operator to allow multiplication of two vectors
+// Overrides the '*' operator to allow multiplication of two vectors
 inline vec3 operator*(const vec3& u, const vec3& v)
 {
 	return vec3(u.e[0] * v.e[0], u.e[1] * v.e[1], u.e[2] * v.e[2]);
 }
 
-// Overrides the * operator to allow a vector to be multiplied by a scalar
+// Overrides the '*' operator to allow a vector to be multiplied by a scalar
 inline vec3 operator*(double t, const vec3& v)
 {
 	return vec3(t*v.e[0], t*v.e[1], t*v.e[2]);
 }
 
-// Overrides the * operator to allow multiplication when order of variables is swapped
+// Overrides the '*' operator to allow multiplication when order of variables is swapped
 inline vec3 operator*(const vec3& v, double t)
 {
 	// calls function above
 	return t * v;
 }
 
-// Overrides the / operator to allow a vector to be divided by a scalar value
+// Overrides the '/' operator to allow a vector to be divided by a scalar value
 inline vec3 operator/(const vec3& v, double t)
 {
 	return (1 / t) * v;
 }
 
-// find the dot product of two vectors
+// find the dot product of two given vectors
 inline double dot(const vec3& u, const vec3& v)
 {
 	return u.e[0] * v.e[0]
@@ -143,7 +151,7 @@ inline double dot(const vec3& u, const vec3& v)
 		 + u.e[2] * v.e[2];
 }
 
-// find the cross product of two vectors
+// find the cross product of two given vectors
 inline vec3 cross(const vec3& u, const vec3& v)
 {
 	return vec3(u.e[1] * v.e[2] - u.e[2] * v.e[1],
@@ -151,7 +159,7 @@ inline vec3 cross(const vec3& u, const vec3& v)
 				u.e[0] * v.e[1] - u.e[1] * v.e[0]);
 }
 
-// returns unit vector of passed vector
+// returns unit vector of passed vector by dividing self by its length
 inline vec3 unit_vector(const vec3& v)
 {
 	return v / v.length();
