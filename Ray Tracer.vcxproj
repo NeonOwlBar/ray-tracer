@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="code\ray.h" />
     <ClInclude Include="code\vec3.h" />
     <ClInclude Include="code\color.h" />
   </ItemGroup>

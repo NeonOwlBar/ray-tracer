@@ -81,7 +81,7 @@ public:
 	}
 };
 
-// point3 is just an alias for ve3, but useful for geometric clarity in the code.
+// point3 is just an alias for ve3, but useful for geometric clarity in the code. (see ray class for an example)
 using point3 = vec3;
 
 

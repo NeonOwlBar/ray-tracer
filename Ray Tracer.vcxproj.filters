@@ -21,6 +21,9 @@
     <ClInclude Include="code\color.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="code\ray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="code\Ray Tracer.cpp">

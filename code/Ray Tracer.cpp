@@ -29,7 +29,7 @@ int main()
         // inner loop for columns
         for (int i = 0; i < image_width; i++)
         {
-            auto pixel_color = color(double(i) / (image_width - 1), double(j) / (image_height - 1), 0.0);
+            auto pixel_color = color(double(i)/(image_width - 1), double(j)/(image_height - 1), 0.0);
             write_color(image_out, pixel_color);
         }
     }
