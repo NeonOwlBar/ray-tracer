@@ -22,16 +22,23 @@
 //      (C - (Q+td)) . (C - (Q+td)) = r^2
 // * Expand this equation out to a quadratic equation (ax^2 + bx + c = 0):
 //      (d.d)t^2 -2td.(C-Q) + (C-Q).(C-Q) - r^2 = 0
-// * Take the discriminant (b^2 - 4ac) from the quadratic formula to find how many 
-//   real solutions the equation has.
-//      a = d.d
+// * Take the discriminant (b^2 - 4ac) from the quadratic formula (x = -b +/- sqrt(b^2 - 4ac) / 2a)
+//   to find how many real solutions the equation has. 
+// NOTE: a vector dotted with itself is equal to the squared length of that vector
+//      a = d.d = d.length_squared()
 //      b = -2d.(C-Q)
-//      c = (C-Q).(C-Q) - r^2
+//      c = (C-Q).(C-Q) - r^2 = (C-Q).length_squared() - r^2
 //      (reminder: d = direction, C is the sphere centre, Q is the origin)
 //    * If the discriminant (b^2 - 4ac) is:
 //        - positive  -> two real solutions (goes through the sphere)
 //        - zero      -> one real solution (is a tangent to the sphere)
 //        - negative  -> no real solutions (misses the sphere entirely)
+// * HOWEVER, b having a factor of -2 allows for a simplification. 
+//   (Explanation: https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/simplifyingtheray-sphereintersectioncode)
+//      Replacing b with -2h in the quadratic formula results in:
+//      x = (h +/- sqrt(h^2 - ac)) / a
+// * Using the previous b coefficient, solving for h results in:
+//      h = d.(C-Q)
 // 
 // Visualisation (as seen in the Ray Tracing in One Weekend, Chapter 5.1): 
 //      https://raytracing.github.io/images/fig-1.05-ray-sphere.jpg
@@ -42,29 +49,53 @@
 /// <param name="center">Centre of the given sphere</param>
 /// <param name="radius">Radius of the given sphere</param>
 /// <param name="r">Ray</param>
-/// <returns>true if ray hit sphere, false if not</returns>
-bool hit_sphere(const point3& center, double radius, const ray& r)
+/// <returns>lowest t value if hit, -1 if not</returns>
+double hit_sphere(const point3& center, double radius, const ray& r)
 {
-    // vector from origin to centre of sphere
+    // Vector from origin to centre of sphere
     vec3 oc = center - r.origin();
 
-    // see NOTE above this function to explain each value
-    auto a = dot(r.direction(), r.direction());
-    auto b = -2.0 * dot(r.direction(), oc);
-    auto c = dot(oc, oc) - radius * radius;
-    auto discriminant = b*b - 4*a*c;    // part of quadratic formula (b^2 - 4ac)
+    // See NOTE above this function to explain why quadratic formula is being used
+    // Any vector dotted against itself = vector's length squared
+    auto a = r.direction().length_squared();
+    // b with factor of -2 removed (replaced b with -2h in quadratic formula)
+    auto h = dot(r.direction(), oc);
+    auto c = oc.length_squared() - radius * radius;
+    // Part of quadratic formula (b^2 - 4ac), adjusted due to h replacing b
+    auto discriminant = h*h - a*c;
 
-    // if discriminant >= 0, there is at least 1 solution (ray hit sphere)
-    // else, ray missed
-    return (discriminant >= 0);
+    // If discriminant < 0, ray missed.
+    // Else, return lowest t value
+    if (discriminant < 0)
+    {
+        // Didn't hit sphere
+        return -1.0;
+    }
+    else
+    {
+        // Quadratic formula solving for x
+        // but ADJUSTED FOR H: x = ( h +/- sqrt(h^2 - ac) )  /  a
+        // Only return the lowest value as this will be closest to the camera
+        return (h - std::sqrt(discriminant)) / a;
+    }
 }
 
-// returns a ray colour given a passed ray
+// Returns a ray colour given a passed ray
 color ray_color(const ray& r)
 {
-    if (hit_sphere(point3(0, 0, -1), 0.5, r))
-        return color(1, 0, 0);
+    // t value for where ray intersects sphere at Z = -1 with radius 0.5 units
+    auto t = hit_sphere(point3(0, 0, -1), 0.5, r);
+    // t = -1 if it missed, so if it hits return a specific colour
+    if (t > 0.0)
+    {
+        // Unit vector from sphere centre to hit point
+        vec3 N = unit_vector(r.at(t) - vec3(0, 0, -1));
+        // Returns a colour representing direction (values between 0 and 1)
+        // x = red, y = blue, z = green
+        return 0.5 * color(N.x() + 1, N.y() + 1, N.z() + 1);
+    }
 
+    // Background colour
     // Calculates unit vector by passing the ray's direction vector
     vec3 unit_direction = unit_vector(r.direction());
     // Keeps a between 0 and 1 for multiplication below
