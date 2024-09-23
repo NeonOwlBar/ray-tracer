@@ -5,6 +5,82 @@
 #include <iostream>
 #include <fstream>
 
+
+// NOTE: SPHERE-RELATED MATHS. Explained in RTiOW here: https://raytracing.github.io/books/RayTracingInOneWeekend.html#addingasphere/ray-sphereintersection
+// The equation for a sphere of radius r that is centered at the origin is:
+//      x^2 + y^2 + z^2 = r^2
+// This also means that if a given point (x, y, z) is on the SURFACE of the sphere, then
+//      x^2 + y^2 + z^2 = r^2. (equal to r^2)
+// If a given point (x, y, z) is INSIDE the sphere, then
+//      x^2 + y^2 + z^2 < r^2. (less than r^2)
+// If a given point (x, y, z) is OUTSIDE the sphere, then
+//      x^2 + y^2 + z^2 > r^2. (greater than r^2)
+// 
+// Applying this to an arbitrary point (Cx, Cy, Cz), the equation becomes:
+//      (Cx - x)^2 + (Cy - y)^2 + (Cz - z)^2 = r^2
+// Converting this to be in terms of vectors, the vector from point P = (x, y, z) 
+// to centre C = (Cx, Cy, Cz) is (C - P).
+// Using the definition of the dot product (below '.' represents a dot symbol):
+//      (C - P) . (C - P) = (Cx - x)^2 + (Cy - y)^2 + (Cz - z)^2
+// Meaning we can rewrite the equation for the arbitrary point as:
+//      (C - P) . (C - P) = r^2
+// We can read this as "any point P that satisfies this equation is ON the sphere". 
+// If the ray P(t) = Q + td (see comment in ray class above orig and dir 
+// declarations) ever hits the sphere,
+// there is some t for with P(t) satisfies the sphere equation. So we are looking 
+// for any t value 
+// where the following is true:
+//      (C - P(t)) . (C - P(t)) = r^2
+// which can be found by replacing P(t) with Q + td:
+//      (C - (Q+td)) . (C - (Q+td)) = r^2
+// In the equation, there are three vectors on the left dotted by three vectors
+// on the right (C, Q and d).
+// Solving this fully would give us nine vectors, but we only care about t, 
+// so we should solve for t.
+//      (-td + (C - Q)) . (-td + (C - Q)) = r^2
+// Too much detail for a comment here, but expanding this equation out and moving r^2 to the 
+// right hand side (minus r^2 from both sides), all remaining vectors are reduced 
+// to scalars by the dot product, and t becomes the only unknown. This means you can
+// use the quadratic formula to solve for t, because the equation ends up looking like this:
+//      (d.d)t^2 -2td.(C-Q) + (C-Q).(C-Q) - r^2 = 0
+// where a = d.d
+//       b = -2d.(C-Q)
+//       c = (C-Q).(C-Q) - r^2
+//      (reminder: d = direction, C is the sphere centre, Q is the origin)
+// 
+// Take the discriminant (b^2 - 4ac) from the quadratic formula (x = (-b +/-sqrt(b^2 - 4ac)) / 2a)
+//  to find the number of real solutions. 
+// If the discriminant (b^2 - 4ac) is:
+//      - positive  -> two real solutions (goes through the sphere)
+//      - zero      -> one real solution (is a tangent to the sphere)
+//      - negative  -> no real solutions (misses the sphere entirely)
+// Visualisation: https://raytracing.github.io/images/fig-1.05-ray-sphere.jpg
+
+
+/// <summary>
+/// Determines if a ray hits a sphere using the quadratic formula
+/// </summary>
+/// <param name="center">Centre of the given sphere</param>
+/// <param name="radius">Radius of the given sphere</param>
+/// <param name="r">Ray</param>
+/// <returns>true if ray hit sphere, false if not</returns>
+bool hit_sphere(const point3& center, double radius, const ray& r)
+{
+    // vector from origin to centre of sphere
+    vec3 oc = center - r.origin();
+
+    // see NOTE above this function to explain each value
+    auto a = dot(r.direction(), r.direction());
+    auto b = -2.0 * dot(r.direction(), oc);
+    auto c = dot(oc, oc) - radius * radius;
+    auto discriminant = b*b - 4*a*c;    // part of quadratic formula (b^2 - 4ac)
+
+    // if discriminant >= 0, there is at least 1 solution, 
+    // so ray does hit sphere
+    return (discriminant >= 0);
+}
+
+// returns a ray colour given a passed ray
 color ray_color(const ray& r)
 {
     // Calculates unit vector by passing the ray's direction vector
@@ -13,7 +89,7 @@ color ray_color(const ray& r)
     // If y = -1, a = 0.    If y = 1, a = 1. 
     auto a = 0.5 * (unit_direction.y() + 1.0);
     // Common linear interpolation calculation in graphics:
-    // blendedValue = (1 - a)*startValue + a*endValue
+    // blendedValue = (1 - a) * startValue  +  a * endValue
     return (1.0 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);
 }
 
