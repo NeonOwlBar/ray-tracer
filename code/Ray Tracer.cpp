@@ -1,99 +1,19 @@
-#include "color.h"
-#include "ray.h"
-#include "vec3.h"
+#include "rtweekend.h"
 
-#include <iostream>
+#include "hittable.h"
+#include "hittable_list.h"
+#include "sphere.h"
+
 #include <fstream>
 
-
-// NOTE: SPHERE-RELATED MATHS. Explained in Ray Tracing in One Weekend here:
-//      https://raytracing.github.io/books/RayTracingInOneWeekend.html#addingasphere/ray-sphereintersection
-// TLDR:
-// * The equation of a sphere at the origin (x^2 + y^2 + z^2 = r^2) can be used 
-//      to determine if a point is inside (< r^2), on (= r^2), or outside (> r^2) a sphere.
-// * Applying this to an arbitrary point (Cx, Cy, Cz) allows that equation to be
-//      rewritten as: (Cx - x)^2 + (Cy - y)^2 + (Cz - z)^2 = r^2
-// * The dot product definition allows this to be written in vector form:
-//      (C - P) . (C - P) = r^2
-// * Representing a ray as a function P(t) = Q + td (see ray class) allows this adjustment,
-//   which is satisfied at some t value, as long as the ray hits the sphere:
-//      (C - P(t)) . (C - P(t)) = r^2
-// * Replace P(t) with Q + td to begin solving for t:
-//      (C - (Q+td)) . (C - (Q+td)) = r^2
-// * Expand this equation out to a quadratic equation (ax^2 + bx + c = 0):
-//      (d.d)t^2 -2td.(C-Q) + (C-Q).(C-Q) - r^2 = 0
-// * Take the discriminant (b^2 - 4ac) from the quadratic formula (x = -b +/- sqrt(b^2 - 4ac) / 2a)
-//   to find how many real solutions the equation has. 
-// NOTE: a vector dotted with itself is equal to the squared length of that vector
-//      a = d.d = d.length_squared()
-//      b = -2d.(C-Q)
-//      c = (C-Q).(C-Q) - r^2 = (C-Q).length_squared() - r^2
-//      (reminder: d = direction, C is the sphere centre, Q is the origin)
-//    * If the discriminant (b^2 - 4ac) is:
-//        - positive  -> two real solutions (goes through the sphere)
-//        - zero      -> one real solution (is a tangent to the sphere)
-//        - negative  -> no real solutions (misses the sphere entirely)
-// * HOWEVER, b having a factor of -2 allows for a simplification. 
-//   (Explanation: https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/simplifyingtheray-sphereintersectioncode)
-//      Replacing b with -2h in the quadratic formula results in:
-//      x = (h +/- sqrt(h^2 - ac)) / a
-// * Using the previous b coefficient, solving for h results in:
-//      h = d.(C-Q)
-// 
-// Visualisation (as seen in the Ray Tracing in One Weekend, Chapter 5.1): 
-//      https://raytracing.github.io/images/fig-1.05-ray-sphere.jpg
-
-/// <summary>
-/// Determines if a ray hits a sphere using the quadratic formula
-/// </summary>
-/// <param name="center">Centre of the given sphere</param>
-/// <param name="radius">Radius of the given sphere</param>
-/// <param name="r">Ray</param>
-/// <returns>lowest t value if hit, -1 if not</returns>
-double hit_sphere(const point3& center, double radius, const ray& r)
+// Returns a ray colour given a passed ray and world
+color ray_color(const ray& r, const hittable& world)
 {
-    // Vector from origin to centre of sphere
-    vec3 oc = center - r.origin();
-
-    // See NOTE above this function to explain why quadratic formula is being used
-    // Any vector dotted against itself = vector's length squared
-    auto a = r.direction().length_squared();
-    // b with factor of -2 removed (replaced b with -2h in quadratic formula)
-    auto h = dot(r.direction(), oc);
-    auto c = oc.length_squared() - radius * radius;
-    // Part of quadratic formula (b^2 - 4ac), adjusted due to h replacing b
-    auto discriminant = h*h - a*c;
-
-    // If discriminant < 0, ray missed.
-    // Else, return lowest t value
-    if (discriminant < 0)
-    {
-        // Didn't hit sphere
-        return -1.0;
-    }
-    else
-    {
-        // Quadratic formula solving for x
-        // but ADJUSTED FOR H: x = ( h +/- sqrt(h^2 - ac) )  /  a
-        // Only return the lowest value as this will be closest to the camera
-        return (h - std::sqrt(discriminant)) / a;
-    }
-}
-
-// Returns a ray colour given a passed ray
-color ray_color(const ray& r)
-{
-    // t value for where ray intersects sphere at Z = -1 with radius 0.5 units
-    auto t = hit_sphere(point3(0, 0, -1), 0.5, r);
-    // t = -1 if it missed, so if it hits return a specific colour
-    if (t > 0.0)
-    {
-        // Unit vector from sphere centre to hit point
-        vec3 N = unit_vector(r.at(t) - vec3(0, 0, -1));
-        // Returns a colour representing direction (values between 0 and 1)
-        // x = red, y = blue, z = green
-        return 0.5 * color(N.x() + 1, N.y() + 1, N.z() + 1);
-    }
+    hit_record rec;
+    // if any object in the world gets hit
+    if (world.hit(r, 0, infinity, rec))
+        // returns the normal in xyz --> rgb[0, 1]
+        return 0.5 * (rec.normal + color(1, 1, 1));
 
     // Background colour
     // Calculates unit vector by passing the ray's direction vector
@@ -102,16 +22,13 @@ color ray_color(const ray& r)
     // If y = -1, a = 0.    If y = 1, a = 1. 
     auto a = 0.5 * (unit_direction.y() + 1.0);
     // Common linear interpolation calculation in graphics:
-    // blendedValue = (1 - a) * startValue  +  a * endValue
+        // blendedValue = (1 - a) * startValue  +  a * endValue
     return (1.0 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);
 }
 
 int main()
 {
     // IMAGE
-    /*int image_width = 256;
-    int image_height = 256;*/
-
     // This is the IDEAL aspect ratio, but due to int rounding it is not
     // necessarily the *actual* aspect ratio.
     auto aspect_ratio = 16.0 / 9.0;
@@ -122,6 +39,14 @@ int main()
     // ideal aspect ratio
     int image_height = int(image_width / aspect_ratio);
     image_height = (image_height < 1) ? 1 : image_height;
+
+    // WORLD
+    hittable_list world;
+
+    // Original sphere
+    world.add(std::make_shared<sphere>(point3(0, 0, -1), 0.5));
+    // Acts as the ground, but it still clearly a sphere
+    world.add(std::make_shared<sphere>(point3(0, -100.5, -1), 100));
 
     // CAMERA
     auto focal_length = 1.0;
@@ -180,7 +105,7 @@ int main()
             auto ray_direction = pixel_center - camera_center;
             ray r(camera_center, ray_direction);
 
-            color pixel_color = ray_color(r);
+            color pixel_color = ray_color(r, world);
             write_color(image_out, pixel_color);
         }
     }

@@ -3,85 +3,82 @@
 #ifndef VEC3_H
 #define VEC3_H
 
-#include <cmath>
-#include <iostream>
-
 /// <summary>
 /// Used for colours, locations, directions, offsets, etc.
 /// </summary>
 class vec3
 {
 public:
-	// Stores three values
-	double e[3];
+    // Stores three values
+    double e[3];
 
-	// Default constructor
-	vec3() : e{ 0,0,0 } {}
-	// Constructor
-	vec3(double e0, double e1, double e2) : e{ e0, e1, e2 } {}
+    // Default constructor
+    vec3() : e{ 0,0,0 } {}
+    // Constructor
+    vec3(double e0, double e1, double e2) : e{ e0, e1, e2 } {}
 
-	// Return each value of e respectively
-	double x() const { return e[0]; }
-	double y() const { return e[1]; }
-	double z() const { return e[2]; }
+    // Return each value of e respectively
+    double x() const { return e[0]; }
+    double y() const { return e[1]; }
+    double z() const { return e[2]; }
 
-	// Returns the negative vector
-	vec3 operator-() const { return vec3(-e[0], -e[1], -e[2]); }
+    // Returns the negative vector
+    vec3 operator-() const { return vec3(-e[0], -e[1], -e[2]); }
 
-	// The below operator[] functions are used on different types of vec3 objects.
-	// A const vec3 cannot be modified and is read-only, 
-	//		and therefore can only return a COPY of a value.
-	// A regular, non-const vec3 CAN be modified (read/write), 
-	//		and therefore returns a REFERENCE to the value.
-	// 
-	// Returns a copy of the value at index i. Read-only.
-	double operator[](int i) const { return e[i]; }
-	// Returns a reference to the value at index i. Read/write.
-	double& operator[](int i) { return e[i]; }
+    // The below operator[] functions are used on different types of vec3 objects.
+    // A const vec3 cannot be modified and is read-only, 
+    //		and therefore can only return a COPY of a value.
+    // A regular, non-const vec3 CAN be modified (read/write), 
+    //		and therefore returns a REFERENCE to the value.
+    // 
+    // Returns a copy of the value at index i. Read-only.
+    double operator[](int i) const { return e[i]; }
+    // Returns a reference to the value at index i. Read/write.
+    double& operator[](int i) { return e[i]; }
 
-	// Adds a passed vector's values to this object's current values
-	vec3& operator +=(const vec3& v)
-	{
-		e[0] += v.e[0];
-		e[1] += v.e[1];
-		e[2] += v.e[2];
-		// Returns the object
-		// ("this" returns a pointer to an object, therefore "*this" 
-		//		dereferences the pointer, returning the object itself).
-		return *this;
-	}
+    // Adds a passed vector's values to this object's current values
+    vec3& operator +=(const vec3& v)
+    {
+        e[0] += v.e[0];
+        e[1] += v.e[1];
+        e[2] += v.e[2];
+        // Returns the object
+        // ("this" returns a pointer to an object, therefore "*this" 
+        //		dereferences the pointer, returning the object itself).
+        return *this;
+    }
 
-	// Multiplies this object's vector values by a passed scalar value
-	vec3& operator*=(double t)
-	{
-		e[0] *= t;
-		e[1] *= t;
-		e[2] *= t;
-		return *this;
-	}
+    // Multiplies this object's vector values by a passed scalar value
+    vec3& operator*=(double t)
+    {
+        e[0] *= t;
+        e[1] *= t;
+        e[2] *= t;
+        return *this;
+    }
 
-	// Divides this object's vector values by a passed scalar value
-	vec3& operator/=(double t)
-	{
-		return *this *= 1/t;
-	}
+    // Divides this object's vector values by a passed scalar value
+    vec3& operator/=(double t)
+    {
+        return *this *= 1/t;
+    }
 
-	// Returns the square root of the length squared (Pythagoras' theorem)
-	double length() const
-	{
-		// this is just sqrt(c) after using a^2 + b^2 = c^2
-		return std::sqrt(length_squared());
-	}
+    // Returns the square root of the length squared (Pythagoras' theorem)
+    double length() const
+    {
+        // this is just sqrt(c) after using a^2 + b^2 = c^2
+        return std::sqrt(length_squared());
+    }
 
-	// Returns the resulting scalar of the sum of each index multiplied by itself
-	double length_squared() const
-	{
-		// a^2 + b^2 + c^2 = ...d^2?
-		return e[0]*e[0] + e[1]*e[1] + e[2]*e[2];
-	}
+    // Returns the resulting scalar of the sum of each index multiplied by itself
+    double length_squared() const
+    {
+        // a^2 + b^2 + c^2 = ...d^2?
+        return e[0]*e[0] + e[1]*e[1] + e[2]*e[2];
+    }
 };
 
-// point3 is just an alias for ve3, but useful for geometric clarity in the code. (see ray class for an example)
+// point3 is just an alias for vec3, but useful for geometric clarity in the code. (see ray class for an example)
 using point3 = vec3;
 
 
@@ -103,66 +100,66 @@ using point3 = vec3;
 //		std::cout << output;	// prints: 0 0 0 
 inline std::ostream& operator<<(std::ostream& out, const vec3& v)
 {
-	return out << v.e[0] << ' ' << v.e[1] << ' ' << v.e[2];
+    return out << v.e[0] << ' ' << v.e[1] << ' ' << v.e[2];
 }
 
 // Overrides the '+' operator to allow components of two vectors to be added together
 inline vec3 operator+(const vec3& u, const vec3& v)
 {
-	return vec3(u.e[0] + v.e[0], u.e[1] + v.e[1], u.e[2] + v.e[2]);
+    return vec3(u.e[0] + v.e[0], u.e[1] + v.e[1], u.e[2] + v.e[2]);
 }
 
 // Overrides the '-' operator to allow components of one vector to be subtracted from another
 inline vec3 operator-(const vec3& u, const vec3& v)
 {
-	return vec3(u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2]);
+    return vec3(u.e[0] - v.e[0], u.e[1] - v.e[1], u.e[2] - v.e[2]);
 }
 
 // Overrides the '*' operator to allow multiplication of two vectors
 inline vec3 operator*(const vec3& u, const vec3& v)
 {
-	return vec3(u.e[0] * v.e[0], u.e[1] * v.e[1], u.e[2] * v.e[2]);
+    return vec3(u.e[0] * v.e[0], u.e[1] * v.e[1], u.e[2] * v.e[2]);
 }
 
 // Overrides the '*' operator to allow a vector to be multiplied by a scalar
 inline vec3 operator*(double t, const vec3& v)
 {
-	return vec3(t*v.e[0], t*v.e[1], t*v.e[2]);
+    return vec3(t*v.e[0], t*v.e[1], t*v.e[2]);
 }
 
 // Overrides the '*' operator to allow multiplication when order of variables is swapped
 inline vec3 operator*(const vec3& v, double t)
 {
-	// calls function above
-	return t * v;
+    // calls function above
+    return t * v;
 }
 
 // Overrides the '/' operator to allow a vector to be divided by a scalar value
 inline vec3 operator/(const vec3& v, double t)
 {
-	return (1 / t) * v;
+    return (1 / t) * v;
 }
 
 // find the dot product of two given vectors
 inline double dot(const vec3& u, const vec3& v)
 {
-	return u.e[0] * v.e[0]
-		 + u.e[1] * v.e[1]
-		 + u.e[2] * v.e[2];
+    return u.e[0] * v.e[0]
+         + u.e[1] * v.e[1]
+         + u.e[2] * v.e[2];
 }
 
 // find the cross product of two given vectors
 inline vec3 cross(const vec3& u, const vec3& v)
 {
-	return vec3(u.e[1] * v.e[2] - u.e[2] * v.e[1],
-				u.e[2] * v.e[0] - u.e[0] * v.e[2], 
-				u.e[0] * v.e[1] - u.e[1] * v.e[0]);
+    return vec3(u.e[1] * v.e[2] - u.e[2] * v.e[1],
+                u.e[2] * v.e[0] - u.e[0] * v.e[2], 
+                u.e[0] * v.e[1] - u.e[1] * v.e[0]);
 }
 
 // returns unit vector of passed vector by dividing self by its length
 inline vec3 unit_vector(const vec3& v)
 {
-	return v / v.length();
+    return v / v.length();
 }
 
 #endif

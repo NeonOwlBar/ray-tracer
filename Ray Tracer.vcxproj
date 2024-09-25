@@ -19,7 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="code\hittable.h" />
+    <ClInclude Include="code\hittable_list.h" />
     <ClInclude Include="code\ray.h" />
+    <ClInclude Include="code\rtweekend.h" />
+    <ClInclude Include="code\sphere.h" />
     <ClInclude Include="code\vec3.h" />
     <ClInclude Include="code\color.h" />
   </ItemGroup>

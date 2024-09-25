@@ -24,6 +24,18 @@
     <ClInclude Include="code\ray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="code\hittable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\sphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\hittable_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="code\rtweekend.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="code\Ray Tracer.cpp">
