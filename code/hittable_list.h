@@ -40,21 +40,21 @@ public:
 
     // Override of pure virtual function in hittable class
     // Returns whether any of the objects in the list have been hit
-    bool hit(const ray& r, double ray_tmin, double ray_tmax, hit_record& rec) const override
+    bool hit(const ray& r, interval ray_t, hit_record& rec) const override
     {
         // Temporary hit data storage
         hit_record temp_rec;
         // Whether the passed ray hit anything
         bool hit_anything = false;
         // stores t value for closest hit point
-        auto closest_so_far = ray_tmax;
+        auto closest_so_far = ray_t.max;
 
         // Cycle through all objects in vector
         for (const auto& object : objects)
         {
             // As the object is a geometry, this would call the geometry's hit function
             // e.g. sphere.hit()
-            if (object->hit(r, ray_tmin, closest_so_far, temp_rec))
+            if (object->hit(r, interval(ray_t.min, closest_so_far), temp_rec))
             {
                 // If got this far, something has been hit
                 hit_anything = true;

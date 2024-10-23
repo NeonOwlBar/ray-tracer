@@ -51,14 +51,14 @@ public:
     sphere(const point3& center, double radius) : center(center), radius(std::fmax(0, radius)) {}
 
     /// <summary>
-    /// Determines if ray hit the sphere. If so, stores hit data in rec
+    /// Determines if ray hit the sphere. If so, stores hit data in rec (hit_record)
     /// </summary>
     /// <param name="r">- Ray to be checked</param>
     /// <param name="ray_tmin">- Minimum t value allowed</param>
     /// <param name="ray_tmax">- Maximum t value allowed</param>
-    /// <param name="rec">- Stores hit data (point of intersection, normal vector ,and t value at point)</param>
-    /// <returns>True if ray hit, false if not</returns>
-    bool hit(const ray& r, double ray_tmin, double ray_tmax, hit_record& rec) const override
+    /// <param name="rec">- Stores hit data (point of intersection, normal vector, and t value at point)</param>
+    /// <returns>true if ray hit, false if not</returns>
+    bool hit(const ray& r, interval ray_t, hit_record& rec) const override
     {
         // Vector from origin to centre of sphere
         vec3 oc = center - r.origin();
@@ -80,12 +80,12 @@ public:
         // Find the nearest root that lies in the acceptable range.
         auto root = (h - sqrt_discriminant) / a;    // Newly simplified quadratic formula.
         // Check if lowest value of t is out of range
-        if (root <= ray_tmin || ray_tmax <= root)
+        if (!ray_t.surrounds(root))
         {
             // If out of range, check the other value of t as well
             root = (h + sqrt_discriminant) / a;
             // If this value is also out of range, exit
-            if (root <= ray_tmin || ray_tmax <= root)
+            if (!ray_t.surrounds(root))
                 return false;
         }
 

@@ -6,13 +6,14 @@
 
 #include <fstream>
 
-// Returns a ray colour given a passed ray and world
+// Returns a ray colour given a passed ray and world (list of hittable objects)
 color ray_color(const ray& r, const hittable& world)
 {
     hit_record rec;
-    // if any object in the world gets hit
-    if (world.hit(r, 0, infinity, rec))
-        // returns the normal in xyz --> rgb[0, 1]
+    // If any object in the world gets hit
+    if (world.hit(r, interval(0, infinity), rec))
+        // Returns the normal where positive x, y, z represents red, green, 
+        // blue, respectively
         return 0.5 * (rec.normal + color(1, 1, 1));
 
     // Background colour
@@ -41,8 +42,8 @@ int main()
     image_height = (image_height < 1) ? 1 : image_height;
 
     // WORLD
+    // Variable 'world' refers to all hittable objects in the world
     hittable_list world;
-
     // Original sphere
     world.add(std::make_shared<sphere>(point3(0, 0, -1), 0.5));
     // Acts as the ground, but it still clearly a sphere
@@ -96,7 +97,7 @@ int main()
         // Outputs number of rows remaining.
         std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
 
-        // inner loop for columns
+        // Inner loop for columns
         for (int i = 0; i < image_width; i++)
         {
             // Centre of current pixel. Calculated relative to pixel00. Add i number of pixel_delta_u

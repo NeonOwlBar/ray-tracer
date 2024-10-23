@@ -35,7 +35,7 @@ public:
     virtual ~hittable() = default;
 
     // Pure virtual function (= 0) - a definition MUST be provided in a derived class.
-    virtual bool hit(const ray& r, double ray_tmin, double ray_tmax, hit_record& rec) const = 0;
+    virtual bool hit(const ray& r, interval ray_t, hit_record& rec) const = 0;
 };
 
 #endif
