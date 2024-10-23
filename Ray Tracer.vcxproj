@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="code\camera.h" />
     <ClInclude Include="code\hittable.h" />
     <ClInclude Include="code\hittable_list.h" />
     <ClInclude Include="code\interval.h" />
