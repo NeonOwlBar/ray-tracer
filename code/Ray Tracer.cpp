@@ -23,6 +23,8 @@ int main()
     // necessarily the *actual* aspect ratio.
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 400;
+    // Define how many samples to use for each pixel
+    cam.samples_per_pixel = 100;
     // initialises the camera and renders the scene for each pixel through the nested for loop
     cam.render(world);
 }
