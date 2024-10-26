@@ -25,6 +25,8 @@ int main()
     cam.image_width = 400;
     // Define how many samples to use for each pixel
     cam.samples_per_pixel = 100;
+    // Defines the max number of times a ray can bounce within the scene.
+    cam.max_depth = 50;
     // initialises the camera and renders the scene for each pixel through the nested for loop
     cam.render(world);
 }

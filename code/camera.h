@@ -16,6 +16,7 @@ public:
     double aspect_ratio = 1.0;	// Ratio of image width over height
     int image_width = 100;		// Rendered image width in pixel count
     int samples_per_pixel = 10; // Count of random samples for each pixel
+    int max_depth = 10;         // Maximum number of ray bounces into scene
 
     void render(const hittable& world)
     {
@@ -47,7 +48,7 @@ public:
                 for (int sample = 0; sample < samples_per_pixel; sample++)
                 {
                     ray r = get_ray(i, j);
-                    pixel_color += ray_color(r, world);
+                    pixel_color += ray_color(r, max_depth, world);
                 }
 
                 // pixel_color is total of all samples, so mulitplay by the samples 
@@ -147,15 +148,31 @@ private:
         return vec3(random_double() - 0.5, random_double() - 0.5, 0);
     }
 
-    color ray_color(const ray& r, const hittable& world) const
+    color ray_color(const ray& r, int depth, const hittable& world) const
     {
+        // If we've exceeded the ray bounce limit, no more light gathered.
+        if (depth <= 0)
+            return color(0, 0, 0);
+
         hit_record rec;
         // If any object in the world gets hit
-        if (world.hit(r, interval(0, infinity), rec))
+            // Ignore any bounces within 0.001 units of previous bounce
+            //  to reduce "shadow acne", where floating point rounding errors
+            //  can calculate the intersection point very slightly inaccurately.
+            // So if the next ray's origin is slightly below the surface, it could
+            //  intersect with that surface again (but won't with the interval 
+            //  starting at 0.001 rather than 0).
+        if (world.hit(r, interval(0.001, infinity), rec))
         {
-            // Returns the normal where positive x, y, z represents red, green, 
-            // blue, respectively
-            return 0.5 * (rec.normal + color(1, 1, 1));
+            // Get a random direction for a ray from the object's surface
+            vec3 direction = random_on_hemisphere(rec.normal);
+            // OMG RECURSION????? It's almost like rays bounce more than once...
+            // Returns half of the color from a bounce to simulate a diffuse material
+            //  Note: if a ray bounces off a material and keeps 100% of it's colour, 
+            //  then we say the material is white. Keep 0% and it's black. Therefore, 
+            //  this should return a grey-ish colour, with a tint of it's surroundings (blue sky).
+            // Depth decreases by 1 each time the function calls itself.
+            return 0.5 * ray_color(ray(rec.p, direction), depth-1, world);
         }
 
         // Background colour

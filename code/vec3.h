@@ -76,6 +76,18 @@ public:
         // a^2 + b^2 + c^2 = ...d^2?
         return e[0]*e[0] + e[1]*e[1] + e[2]*e[2];
     }
+
+    // Returns a random vector from where each value is [0, 1) 
+    static vec3 random()
+    {
+        return vec3(random_double(), random_double(), random_double());
+    }
+
+    // Returns a random vector where each value is [min, max)
+    static vec3 random(double min, double max)
+    {
+        return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
+    }
 };
 
 // point3 is just an alias for vec3, but useful for geometric clarity in the code. (see ray class for an example)
@@ -84,7 +96,7 @@ using point3 = vec3;
 
 // Vector Utility Functions - Define how other types can interact with a vec3
 
-// NOTE: "The "inline" keyword suggets that the compiler substitute the code within
+// NOTE: "The "inline" keyword suggests that the compiler substitute the code within
 // the function definition in place of each call to that function."
 //	*	In theory, this makes the program faster due to not needing to call the function,
 //		as the function call is replaced by the code within the function.
@@ -130,7 +142,7 @@ inline vec3 operator*(double t, const vec3& v)
 // Overrides the '*' operator to allow multiplication when order of variables is swapped
 inline vec3 operator*(const vec3& v, double t)
 {
-    // calls function above
+    // Calls function above
     return t * v;
 }
 
@@ -140,7 +152,7 @@ inline vec3 operator/(const vec3& v, double t)
     return (1 / t) * v;
 }
 
-// find the dot product of two given vectors
+// Find the dot product of two given vectors
 inline double dot(const vec3& u, const vec3& v)
 {
     return u.e[0] * v.e[0]
@@ -148,7 +160,7 @@ inline double dot(const vec3& u, const vec3& v)
          + u.e[2] * v.e[2];
 }
 
-// find the cross product of two given vectors
+// Find the cross product of two given vectors
 inline vec3 cross(const vec3& u, const vec3& v)
 {
     return vec3(u.e[1] * v.e[2] - u.e[2] * v.e[1],
@@ -156,10 +168,42 @@ inline vec3 cross(const vec3& u, const vec3& v)
                 u.e[0] * v.e[1] - u.e[1] * v.e[0]);
 }
 
-// returns unit vector of passed vector by dividing self by its length
+// Returns unit vector of passed vector by dividing self by its length
 inline vec3 unit_vector(const vec3& v)
 {
     return v / v.length();
+}
+
+// Returns a random unit vector (surprise!)
+inline vec3 random_unit_vector()
+{
+    while (true)
+    {
+        // Generate a random vector
+        auto p = vec3::random(-1, 1);
+        // Anything with a squared length >1 will not be within unit sphere
+        auto lensq = p.length_squared();
+        // Due to floating-points having finite precision, a very samll value ca
+        //  can underflow to zero when squared. If all three values are small enough, 
+        //  the normal will be zero and the vector will become [+/-infinity, +/-infinity, +/-infinity].
+        // Therefore reject vectors within this length. As we are using doubles, 
+        //  these can safely store values greater than 10^(-160)
+        if (1e-160 < lensq && lensq <= 1)
+            return p / sqrt(lensq);
+    }
+}
+
+// Returns a random unit vector in the same hemisphere as the provided normal
+inline vec3 random_on_hemisphere(const vec3& normal)
+{
+    // Generate random unit vector
+    vec3 on_unit_sphere = random_unit_vector();
+
+    // If unit vector is in same hemisphere as the normal, return it. Otherwise, return it inverted.
+    if (dot(on_unit_sphere, normal) > 0.0)
+        return on_unit_sphere;
+    else
+        return -on_unit_sphere;
 }
 
 #endif
