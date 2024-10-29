@@ -4,6 +4,7 @@
 #define CAMERA_H
 
 #include "hittable.h"
+#include "material.h"
 
 #include <fstream>
 
@@ -164,24 +165,23 @@ private:
             //  starting at 0.001 rather than 0).
         if (world.hit(r, interval(0.001, infinity), rec))
         {
-            // Get a random direction for a ray from the object's surface where the
-            //  reflected rays are scattered in a manner that is proportional to cos(phi). (Lambertian distribution)
-            // The point at which this direction ends is a point on a unit sphere,
-            //  centered at the surface normal. 
-            // Explanation: https://raytracing.github.io/books/RayTracingInOneWeekend.html#diffusematerials/truelambertianreflection
-            vec3 direction = rec.normal + random_unit_vector();
-            // To go back to randomised vectors and undo the Lambertian changes:
-            //  - remove above "vec3 direction = rec.normal + random_unit_vector();"
-            //  - replace is with: "vec3 direction = random_on_hemisphere(rec.normal);"
+            //// Get a random direction for a ray from the object's surface where the
+            ////  reflected rays are scattered in a manner that is proportional to cos(phi). (Lambertian distribution)
+            //// The point at which this direction ends is a point on a unit sphere,
+            ////  centered at the surface normal. 
+            //// Explanation: https://raytracing.github.io/books/RayTracingInOneWeekend.html#diffusematerials/truelambertianreflection
+            //vec3 direction = rec.normal + random_unit_vector();
+            //// To go back to randomised vectors and undo the Lambertian changes:
+            ////  - remove above "vec3 direction = rec.normal + random_unit_vector();"
+            ////  - replace is with: "vec3 direction = random_on_hemisphere(rec.normal);"
 
-
-            // OMG RECURSION????? It's almost like rays bounce more than once...
-            // Returns half of the color from a bounce to simulate a diffuse material
-            //  Note: if a ray bounces off a material and keeps 100% of it's colour, 
-            //  then we say the material is white. Keep 0% and it's black. Therefore, 
-            //  this should return a grey-ish colour, with a tint of it's surroundings (blue sky).
-            // Depth decreases by 1 each time the function calls itself.
-            return 0.5 * ray_color(ray(rec.p, direction), depth-1, world);
+            ray scattered;
+            color attenuation;
+            // If ray got reflected/scattered, get the colour of the scattered 
+            // ray multiplied by the colors of previous ray hits along this path
+            if (rec.mat->scatter(r, rec, attenuation, scattered))
+                return attenuation * ray_color(scattered, depth - 1, world);
+            return color(0, 0, 0);
         }
 
         // Background colour

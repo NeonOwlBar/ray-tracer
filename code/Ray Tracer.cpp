@@ -3,6 +3,7 @@
 #include "camera.h"
 #include "hittable.h"
 #include "hittable_list.h"
+#include "material.h"
 #include "sphere.h"
 
 int main()
@@ -11,10 +12,18 @@ int main()
 
     // Variable 'world' refers to a list of all hittable objects in the world
     hittable_list world;
-    // Original sphere
-    world.add(std::make_shared<sphere>(point3(0, 0, -1), 0.5));
-    // Acts as the ground, but it still clearly a sphere
-    world.add(std::make_shared<sphere>(point3(0, -100.5, -1), 100));
+    
+    // Create materials for the ground, and left, centre and right spheres
+    auto material_ground = std::make_shared<lambertian>(color(0.8, 0.8, 0.0));
+    auto material_center = std::make_shared<lambertian>(color(0.1, 0.2, 0.5));
+    auto material_left = std::make_shared<metal>(color(0.8, 0.8, 0.8), 0.3);
+    auto material_right = std::make_shared<metal>(color(0.8, 0.6, 0.2), 1.0);
+
+    // Add spheres, assigning them one of the above materials
+    world.add(std::make_shared<sphere>(point3( 0.0, -100.5, -1.0), 100.0, material_ground));
+    world.add(std::make_shared<sphere>(point3( 0.0,    0.0, -1.2),   0.5, material_center));
+    world.add(std::make_shared<sphere>(point3(-1.0,    0.0, -1.0),   0.5, material_left));
+    world.add(std::make_shared<sphere>(point3( 1.0,    0.0, -1.0),   0.5, material_right));
 
     // CAMERA
     camera cam;

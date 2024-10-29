@@ -77,6 +77,13 @@ public:
         return e[0]*e[0] + e[1]*e[1] + e[2]*e[2];
     }
 
+    bool near_zero() const
+    {
+        // Return true if the vector is close to zero in ALL dimensions.
+        auto s = 1e-8; // 10^(-8)
+        return (std::fabs(e[0]) < s) && (std::fabs(e[1]) < s) && (std::fabs(e[2]) < s);
+    }
+
     // Returns a random vector from where each value is [0, 1) 
     static vec3 random()
     {
@@ -204,6 +211,19 @@ inline vec3 random_on_hemisphere(const vec3& normal)
         return on_unit_sphere;
     else
         return -on_unit_sphere;
+}
+
+
+// Returns the perfectly reflected vector
+inline vec3 reflect(const vec3& v, const vec3& n)
+{
+    // v = vector of incident ray
+    // n = surface normal
+    // Full explanation: https://raytracing.github.io/books/RayTracingInOneWeekend.html#metal/mirroredlightreflection
+    // Diagram only: https://raytracing.github.io/images/fig-1.15-reflection.jpg
+    
+    // In the form v + 2b = reflectedDirection
+    return v - 2*dot(v, n)*n;
 }
 
 #endif

@@ -46,9 +46,10 @@ class sphere : public hittable
 {
 public:
     // Constructor creates a sphere at point 'center' with radius 'radius'
-    // (or zero, if radius < 0) and assigns values to members
+    // (or zero, if radius < 0) and assigns a material 'mat' to it
     // NOTE: Using std::fmax() which returns a FLOAT
-    sphere(const point3& center, double radius) : center(center), radius(std::fmax(0, radius)) {}
+    sphere(const point3& center, double radius, std::shared_ptr<material> mat)
+        : center(center), radius(std::fmax(0, radius)), mat(mat) {}
 
     /// <summary>
     /// Determines if ray hit the sphere. If so, stores hit data in rec (hit_record)
@@ -101,6 +102,8 @@ public:
         vec3 outward_normal = (rec.p - center) / radius;
         // Determine whether face normal is pointing outwards or inwards
         rec.set_face_normal(r, outward_normal);
+        // Store material data
+        rec.mat = mat;
 
         // Because ray hit
         return true;
@@ -109,6 +112,7 @@ public:
 private:
     point3 center;
     double radius;
+    std::shared_ptr<material> mat;
 };
 
 #endif

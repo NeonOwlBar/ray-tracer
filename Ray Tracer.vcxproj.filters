@@ -42,6 +42,9 @@
     <ClInclude Include="code\camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="code\material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="code\Ray Tracer.cpp">
